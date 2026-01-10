@@ -1,4 +1,9 @@
 from database.DB_connect import DBConnect
+from model.category import Category
+from model.order import Order
+from model.orderItem import OrderItem
+from model.product import Product
+
 
 class DAO:
     @staticmethod
@@ -22,3 +27,80 @@ class DAO:
         cursor.close()
         conn.close()
         return first, last
+
+    @staticmethod
+    def getCategory():
+        conn = DBConnect.get_connection()
+
+        result = {}
+
+        cursor = conn.cursor(dictionary=True)
+        query = """ SELECT * FROM category """
+        cursor.execute(query)
+
+        for row in cursor:
+            category = Category(**row)
+            result[category.id] = category
+
+
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
+    def getProducts():
+        conn = DBConnect.get_connection()
+
+        result = {}
+
+        cursor = conn.cursor(dictionary=True)
+        query = """ SELECT * FROM product """
+        cursor.execute(query)
+
+        for row in cursor:
+            product = Product(**row)
+            result[product.id] = product
+
+
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
+    def getOrder():
+        conn = DBConnect.get_connection()
+
+        result = {}
+
+        cursor = conn.cursor(dictionary=True)
+        query = """SELECT * FROM `order` """
+        cursor.execute(query)
+
+        for row in cursor:
+            order = Order(**row)
+            result[order.id] = order
+
+
+        cursor.close()
+        conn.close()
+        return result
+
+    @staticmethod
+    def getOrderItem():
+        conn = DBConnect.get_connection()
+
+        result = []
+
+        cursor = conn.cursor(dictionary=True)
+        query = """ SELECT * FROM order_item """
+        cursor.execute(query)
+
+        for row in cursor:
+            order_item = OrderItem(**row)
+            result.append(order_item)
+
+
+        cursor.close()
+        conn.close()
+        return result
+
