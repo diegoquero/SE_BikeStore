@@ -39,7 +39,7 @@ class Model:
             d = dizioOrder[id_order].order_date.date()
             if start<=d<=end:
                     listaOrdiniFiltrata.append(dizioOrder[id_order].id)
-            for order_item in listaOrderItem:
+        for order_item in listaOrderItem:
                 if order_item.order_id in listaOrdiniFiltrata:
                     if order_item.product_id in listaProdottiFiltrata:
                         if dizio_prodotti_per_numero_vendite_filtrati.get(order_item.product_id):
@@ -48,6 +48,8 @@ class Model:
                             dizio_prodotti_per_numero_vendite_filtrati[order_item.product_id] = 1
 
         print('finito')
+        print("Prodotti in categoria:", len(listaProdottiFiltrata))
+        print("Prodotti venduti nel range:", len(dizio_prodotti_per_numero_vendite_filtrati.keys()))
         return dizio_prodotti_per_numero_vendite_filtrati
 
 
@@ -69,6 +71,58 @@ class Model:
                             self.G.add_edge(id_product, id_product2, weight=peso)
                             self.G.add_edge(id_product2, id_product, weight=peso)
         print(self.G)
+
+    def getProdottiVenduti(self):
+        PesiNodi = []
+        for nodo in self.G.nodes():
+            pesiArchiEntranti = []
+            pesiArchiUscenti = []
+
+            for _,_,data in self.G.out_edges(nodo, data=True):
+                print()
+                peso = data['weight']
+                pesiArchiUscenti.append(peso)
+            for _,_,data in self.G.in_edges(nodo, data=True):
+                peso = data['weight']
+                pesiArchiEntranti.append(peso)
+            pesoNodo= sum(pesiArchiUscenti)-sum(pesiArchiEntranti)
+            PesiNodi.append((nodo,pesoNodo))
+        PesiNodi.sort(key=lambda x: x[1], reverse=True)
+        pesiNodiFinal = PesiNodi[:5]
+        print('PesiNodi:', pesiNodiFinal)
+        return pesiNodiFinal
+
+
+
+
+    def getPercorsoOttimo(self, nodo_start, nodo_end, lunghezza):
+        self.bestPercorso = []
+        self.bestPeso = 0
+        self.ricorsione([nodo_start], 0, nodo_end, lunghezza)
+
+    def ricorsione(self, parziale, peso_parziale, nodo_end, lunghezza):
+        if len(parziale)>lunghezza:
+            return
+
+        if len(parziale)==lunghezza:
+            if parziale[-1]==nodo_end:
+                if peso_parziale>self.bestPeso:
+                    self.bestPeso = peso_parziale
+                    self.bestPercorso = parziale.copy()
+        nodo_corrente = parziale[-1]
+        for nodo in self.G.neighbors(nodo_corrente):
+            if nodo not in parziale:
+                    peso = self.G[nodo_corrente][nodo]['weight']
+                    parziale.append(nodo)
+
+                    self.ricorsione(parziale, peso_parziale + peso, nodo_end, lunghezza)
+                    parziale.pop()
+
+
+
+
+
+
 
 
 
